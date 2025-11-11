@@ -8,12 +8,12 @@ import (
 
 var ReplPage PageID = "repl"
 
-func NewReplPage() tea.Model {
+func NewReplPage(app *app.App) tea.Model {
 	return layout.NewBentoLayout(
 		layout.BentoPanes{
-			layout.BentoLeftPane:        repl.NewThreadsCmp(),
-			layout.BentoRightTopPane:    repl.NewMessagesCmp(),
-			layout.BentoRightBottomPane: repl.NewEditorCmp(),
+			layout.BentoLeftPane:        repl.NewSessionsCmp(app),
+			layout.BentoRightTopPane:    repl.NewMessagesCmp(app),
+			layout.BentoRightBottomPane: repl.NewEditorCmp(app),
 		},
 	)
 }

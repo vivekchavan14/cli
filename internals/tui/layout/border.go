@@ -24,9 +24,12 @@ var (
 	InactivePreviewBorder = styles.Grey
 )
 
-func Borderize(content string, active bool, embeddedText map[BorderPosition]string) string {
+func Borderize(content string, active bool, embeddedText map[BorderPosition]string, activeColor lipgloss.TerminalColor) string {
 	if embeddedText == nil {
 		embeddedText = make(map[BorderPosition]string)
+	}
+	if activeColor == nil {
+		activeColor = ActiveBorder
 	}
 	var (
 		thickness = map[bool]lipgloss.Border{
@@ -34,7 +37,7 @@ func Borderize(content string, active bool, embeddedText map[BorderPosition]stri
 			false: lipgloss.Border(lipgloss.NormalBorder()),
 		}
 		color = map[bool]lipgloss.TerminalColor{
-			true:  ActiveBorder,
+			true:  activeColor,
 			false: InactivePreviewBorder,
 		}
 		border = thickness[active]
@@ -56,9 +59,11 @@ func Borderize(content string, active bool, embeddedText map[BorderPosition]stri
 		leftText = encloseInSquareBrackets(leftText)
 		middleText = encloseInSquareBrackets(middleText)
 		rightText = encloseInSquareBrackets(rightText)
+		// Calculate length of border between embedded texts
 		remaining := max(0, width-lipgloss.Width(leftText)-lipgloss.Width(middleText)-lipgloss.Width(rightText))
 		leftBorderLen := max(0, (width/2)-lipgloss.Width(leftText)-(lipgloss.Width(middleText)/2))
 		rightBorderLen := max(0, remaining-leftBorderLen)
+		// Then construct border string
 		s := leftText +
 			style.Render(strings.Repeat(inbetween, leftBorderLen)) +
 			middleText +
@@ -72,6 +77,7 @@ func Borderize(content string, active bool, embeddedText map[BorderPosition]stri
 		// Add the corners
 		return style.Render(leftCorner) + s + style.Render(rightCorner)
 	}
+	// Stack top border, content and horizontal borders, and bottom border.
 	return strings.Join([]string{
 		buildHorizontalBorder(
 			embeddedText[TopLeftBorder],

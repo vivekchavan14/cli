@@ -1,4 +1,6 @@
 # Binaries for programs and plugins
+Omnitrix.md
+.omnitrix
 *.exe
 *.exe~
 *.dll
