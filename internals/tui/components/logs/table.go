@@ -10,6 +10,7 @@ import (
 	"github.com/omnitrix-sh/cli/internals/logging"
 	"github.com/omnitrix-sh/cli/internals/pubsub"
 	"github.com/omnitrix-sh/cli/internals/tui/layout"
+	"github.com/omnitrix-sh/cli/internals/tui/styles"
 )
 
 type TableComponent interface {
@@ -122,8 +123,11 @@ func NewLogsTable() TableComponent {
 		{Title: "Message", Width: 10},
 		{Title: "Attributes", Width: 10},
 	}
+	defaultStyles := table.DefaultStyles()
+	defaultStyles.Selected = defaultStyles.Selected.Foreground(styles.Primary)
 	tableModel := table.New(
 		table.WithColumns(columns),
+		table.WithStyles(defaultStyles),
 	)
 	return &tableCmp{
 		table: tableModel,
