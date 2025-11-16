@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"database/sql"
+	"sync"
 
 	"github.com/omnitrix-sh/cli/internals/config"
 	"github.com/omnitrix-sh/cli/internals/database"
@@ -23,15 +24,16 @@ type App struct {
 	Messages    message.Service
 	Permissions permission.Service
 
-	LSPClients map[string]*lsp.Client
+	LSPClients   map[string]*lsp.Client
+	clientsMutex sync.RWMutex
 
 	Logger logging.Interface
 
-	Status  *pubsub.Broker[util.InfoMsg]
-	ceanups []func()
+	Status   *pubsub.Broker[util.InfoMsg]
+	cleanups []func()
 }
 
-func New(ctx context.Context, conn *sql.DB) *App {
+func New(ctx context.Context, conn *sql.DB) (*App, error) {
 	cfg := config.Get()
 	q := database.New(conn)
 	log := logging.NewLogger(logging.Options{
@@ -52,7 +54,7 @@ func New(ctx context.Context, conn *sql.DB) *App {
 
 	for name, client := range cfg.LSP {
 		lspClient, err := lsp.NewClient(client.Command, client.Args...)
-		app.ceanups = append(app.ceanups, func() {
+		app.cleanups = append(app.cleanups, func() {
 			lspClient.Close()
 		})
 		workspaceWatcher := watcher.NewWorkspaceWatcher(lspClient)
@@ -69,15 +71,28 @@ func New(ctx context.Context, conn *sql.DB) *App {
 		go workspaceWatcher.WatchWorkspace(ctx, config.WorkingDirectory())
 		app.LSPClients[name] = lspClient
 	}
-	return app
+	return app, nil
 }
 
 func (a *App) Close() {
-	for _, cleanup := range a.ceanups {
+	// Run cleanup functions
+	for _, cleanup := range a.cleanups {
 		cleanup()
 	}
-	for _, client := range a.LSPClients {
-		client.Close()
+
+	// Safely close LSP clients
+	a.clientsMutex.RLock()
+	clients := make(map[string]*lsp.Client, len(a.LSPClients))
+	for k, v := range a.LSPClients {
+		clients[k] = v
 	}
+	a.clientsMutex.RUnlock()
+
+	for name, client := range clients {
+		if err := client.Close(); err != nil {
+			a.Logger.Error("Failed to close LSP client", "name", name, "error", err)
+		}
+	}
+
 	a.Logger.Info("App closed")
 }
