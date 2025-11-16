@@ -59,6 +59,7 @@ func NewCoderAgent(app *app.App) (Agent, error) {
 					tools.NewGlobTool(),
 					tools.NewGrepTool(),
 					tools.NewLsTool(),
+					tools.NewPatchTool(app.LSPClients, app.Permissions),
 					tools.NewSourcegraphTool(),
 					tools.NewViewTool(app.LSPClients),
 					tools.NewWriteTool(app.LSPClients),
