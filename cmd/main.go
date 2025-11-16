@@ -42,7 +42,10 @@ var rootCmd = &cobra.Command{
 		}
 		ctx := context.Background()
 
-		app := app.New(ctx, conn)
+		app, err := app.New(ctx, conn)
+		if err != nil {
+			return err
+		}
 		defer app.Close()
 		app.Logger.Info("Starting omnitrix...")
 		zone.NewGlobal()
@@ -56,7 +59,6 @@ var rootCmd = &cobra.Command{
 		defer unsub()
 
 		go func() {
-			// Set this up once
 			agent.GetMcpTools(ctx)
 			for msg := range ch {
 				tui.Send(msg)
@@ -114,6 +116,17 @@ func setupSubscriptions(app *app.App) (chan tea.Msg, func()) {
 			wg.Done()
 		}()
 	}
+	{
+		sub := app.Status.Subscribe(ctx)
+		wg.Add(1)
+		go func() {
+			for ev := range sub {
+				ch <- ev
+			}
+			wg.Done()
+		}()
+	}
+
 	return ch, func() {
 		cancel()
 		wg.Wait()
