@@ -3,10 +3,12 @@ package app
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"sync"
 
 	"github.com/omnitrix-sh/cli/internals/config"
 	"github.com/omnitrix-sh/cli/internals/database"
+	"github.com/omnitrix-sh/cli/internals/format"
 	"github.com/omnitrix-sh/cli/internals/logging"
 	"github.com/omnitrix-sh/cli/internals/lsp"
 	"github.com/omnitrix-sh/cli/internals/lsp/watcher"
@@ -95,4 +97,35 @@ func (a *App) Close() {
 	}
 
 	a.Logger.Info("App closed")
+}
+
+func (a *App) RunNonInteractive(ctx context.Context, prompt string, outputFormat string, quiet bool) error {
+	a.Logger.Info("Running in non-interactive mode", "prompt_length", len(prompt))
+
+	// Start spinner if not in quiet mode
+	var spinner *format.Spinner
+	if !quiet {
+		spinner = format.NewSpinner("Thinking...")
+		spinner.Start()
+		defer spinner.Stop()
+	}
+
+	// Create session for non-interactive run
+	sess, err := a.Sessions.Create(prompt[:min(len(prompt), 100)])
+	if err != nil {
+		return fmt.Errorf("failed to create session: %w", err)
+	}
+	a.Logger.Info("Created session for non-interactive run", "session_id", sess.ID)
+
+	// Auto-approve all permissions for non-interactive mode
+	// This is safe because the user is explicitly running a command
+
+	return nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

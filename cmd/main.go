@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"sync"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/omnitrix-sh/cli/internals/app"
 	"github.com/omnitrix-sh/cli/internals/config"
 	"github.com/omnitrix-sh/cli/internals/database"
+	"github.com/omnitrix-sh/cli/internals/format"
 	agent "github.com/omnitrix-sh/cli/internals/llm/agents"
 	"github.com/omnitrix-sh/cli/internals/tui"
 	"github.com/spf13/cobra"
@@ -25,49 +27,66 @@ var rootCmd = &cobra.Command{
 			cmd.Help()
 			return nil
 		}
-		debug, _ := cmd.Flags().GetBool("debug")
-		viper.Set("debug", debug)
-		if debug {
-			viper.Set("log.level", "debug")
-		}
+	debug, _ := cmd.Flags().GetBool("debug")
+	prompt, _ := cmd.Flags().GetString("prompt")
+	outputFormat, _ := cmd.Flags().GetString("output-format")
+	quiet, _ := cmd.Flags().GetBool("quiet")
 
-		// Load configuration before connecting to database
-		if err := config.Load(debug); err != nil {
-			return err
-		}
+	viper.Set("debug", debug)
+	if debug {
+		viper.Set("log.level", "debug")
+	}
 
-		conn, err := database.Connect()
-		if err != nil {
-			return err
-		}
-		ctx := context.Background()
+	// Validate format option
+	if !format.IsValid(outputFormat) {
+		return fmt.Errorf("invalid format option: %s\n%s", outputFormat, format.GetHelpText())
+	}
 
-		app, err := app.New(ctx, conn)
-		if err != nil {
-			return err
-		}
-		defer app.Close()
-		app.Logger.Info("Starting omnitrix...")
-		zone.NewGlobal()
-		tui := tea.NewProgram(
-			tui.New(app),
-			tea.WithAltScreen(),
-			tea.WithMouseCellMotion(),
-		)
-		app.Logger.Info("Setting up subscriptions...")
-		ch, unsub := setupSubscriptions(app)
-		defer unsub()
+	// Load configuration before connecting to database
+	if err := config.Load(debug); err != nil {
+		return err
+	}
 
-		go func() {
-			agent.GetMcpTools(ctx)
-			for msg := range ch {
-				tui.Send(msg)
-			}
-		}()
-		if _, err := tui.Run(); err != nil {
-			return err
+	conn, err := database.Connect()
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+
+	appInstance, err := app.New(ctx, conn)
+	if err != nil {
+		return err
+	}
+	defer appInstance.Close()
+
+	// Non-interactive mode
+	if prompt != "" {
+		appInstance.Logger.Info("Running non-interactive mode", "prompt_length", len(prompt))
+		return appInstance.RunNonInteractive(ctx, prompt, outputFormat, quiet)
+	}
+
+	// Interactive mode (TUI)
+	appInstance.Logger.Info("Starting omnitrix...")
+	zone.NewGlobal()
+	tuiProgram := tea.NewProgram(
+		tui.New(appInstance),
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
+	)
+	appInstance.Logger.Info("Setting up subscriptions...")
+	ch, unsub := setupSubscriptions(appInstance)
+	defer unsub()
+
+	go func() {
+		agent.GetMcpTools(ctx)
+		for msg := range ch {
+			tuiProgram.Send(msg)
 		}
-		return nil
+	}()
+	if _, err := tuiProgram.Run(); err != nil {
+		return err
+	}
+	return nil
 	},
 }
 
@@ -143,5 +162,8 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().BoolP("help", "h", false, "Help")
-	rootCmd.Flags().BoolP("debug", "d", false, "Help")
+	rootCmd.Flags().BoolP("debug", "d", false, "Enable debug mode")
+	rootCmd.Flags().StringP("prompt", "p", "", "Prompt to run in non-interactive mode")
+	rootCmd.Flags().StringP("output-format", "f", "text", "Output format for non-interactive mode (text, json)")
+	rootCmd.Flags().BoolP("quiet", "q", false, "Hide spinner in non-interactive mode")
 }
