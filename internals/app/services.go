@@ -7,6 +7,7 @@ import (
 
 	"github.com/omnitrix-sh/cli/internals/config"
 	"github.com/omnitrix-sh/cli/internals/database"
+	"github.com/omnitrix-sh/cli/internals/history"
 	"github.com/omnitrix-sh/cli/internals/logging"
 	"github.com/omnitrix-sh/cli/internals/lsp"
 	"github.com/omnitrix-sh/cli/internals/lsp/watcher"
@@ -23,6 +24,7 @@ type App struct {
 	Sessions    session.Service
 	Messages    message.Service
 	Permissions permission.Service
+	History     history.Service
 
 	LSPClients   map[string]*lsp.Client
 	clientsMutex sync.RWMutex
@@ -41,12 +43,14 @@ func New(ctx context.Context, conn *sql.DB) (*App, error) {
 	})
 	sessions := session.NewService(ctx, q)
 	messages := message.NewService(ctx, q)
+	hist := history.NewService(q, conn)
 
 	app := &App{
 		Context:     ctx,
 		Sessions:    sessions,
 		Messages:    messages,
 		Permissions: permission.Default,
+		History:     hist,
 		Logger:      log,
 		Status:      pubsub.NewBroker[util.InfoMsg](),
 		LSPClients:  make(map[string]*lsp.Client),
