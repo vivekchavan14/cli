@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/omnitrix-sh/cli/internals/llm/tools"
+	"github.com/omnitrix-sh/cli/internal/llm/tools"
 )
 
 func main() {

@@ -1,4 +1,4 @@
-// Package vimtea provides a Vim-like text editor component for terminal applications
+// Package editor provides a Vim-like text editor component for terminal applications
 package editor
 
 // Cursor represents a position in the text buffer with row and column coordinates
