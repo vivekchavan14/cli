@@ -9,42 +9,40 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	zone "github.com/lrstanley/bubblezone"
-	"github.com/omnitrix-sh/cli/internals/app"
-	"github.com/omnitrix-sh/cli/internals/config"
-	"github.com/omnitrix-sh/cli/internals/db"
-	"github.com/omnitrix-sh/cli/internals/format"
-	"github.com/omnitrix-sh/cli/internals/llm/agent"
-	"github.com/omnitrix-sh/cli/internals/logging"
-	"github.com/omnitrix-sh/cli/internals/pubsub"
-	"github.com/omnitrix-sh/cli/internals/tui"
-	"github.com/omnitrix-sh/cli/internals/version"
 	"github.com/spf13/cobra"
+	"github.com/omnitrix-sh/cli/internal/app"
+	"github.com/omnitrix-sh/cli/internal/config"
+	"github.com/omnitrix-sh/cli/internal/db"
+	"github.com/omnitrix-sh/cli/internal/format"
+	"github.com/omnitrix-sh/cli/internal/llm/agent"
+	"github.com/omnitrix-sh/cli/internal/logging"
+	"github.com/omnitrix-sh/cli/internal/pubsub"
+	"github.com/omnitrix-sh/cli/internal/tui"
+	"github.com/omnitrix-sh/cli/internal/version"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "opencode",
-	Short: "Terminal-based AI assistant for software development",
-	Long: `OpenCode is a powerful terminal-based AI assistant that helps with software development tasks.
-It provides an interactive chat interface with AI capabilities, code analysis, and LSP integration
-to assist developers in writing, debugging, and understanding code directly from the terminal.`,
+	Use:   "omnitrix.sh",
+	Short: "cursor for terminal",
+	Long:  `a claude cli alternative with no vendor lock-in`,
 	Example: `
   # Run in interactive mode
-  opencode
+  omnitrix
 
   # Run with debug logging
-  opencode -d
+  omnitrix -d
 
   # Run with debug logging in a specific directory
-  opencode -d -c /path/to/project
+  omnitrix -d -c /path/to/project
 
   # Print version
-  opencode -v
+  omnitrix -v
 
   # Run a single non-interactive prompt
-  opencode -p "Explain the use of context in Go"
+  omnitrix -p "Explain the use of context in Go"
 
   # Run a single non-interactive prompt with JSON output format
-  opencode -p "Explain the use of context in Go" -f json
+  omnitrix -p "Explain the use of context in Go" -f json
   `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// If the help flag is set, show the help message

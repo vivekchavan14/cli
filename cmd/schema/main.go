@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/omnitrix-sh/cli/internals/config"
-	"github.com/omnitrix-sh/cli/internals/llm/models"
+	"github.com/omnitrix-sh/cli/internal/config"
+	"github.com/omnitrix-sh/cli/internal/llm/models"
 )
 
 // JSONSchemaType represents a JSON Schema type
@@ -38,8 +38,8 @@ func main() {
 func generateSchema() map[string]any {
 	schema := map[string]any{
 		"$schema":     "http://json-schema.org/draft-07/schema#",
-		"title":       "OpenCode Configuration",
-		"description": "Configuration schema for the OpenCode application",
+		"title":       "Omnitrix Configuration",
+		"description": "Configuration schema for the Omnitrix application",
 		"type":        "object",
 		"properties":  map[string]any{},
 	}
@@ -52,7 +52,7 @@ func generateSchema() map[string]any {
 			"directory": map[string]any{
 				"type":        "string",
 				"description": "Directory where application data is stored",
-				"default":     ".opencode",
+				"default":     ".omnitrix",
 			},
 		},
 		"required": []string{"directory"},
@@ -89,12 +89,12 @@ func generateSchema() map[string]any {
 			".cursor/rules/",
 			"CLAUDE.md",
 			"CLAUDE.local.md",
-			"opencode.md",
-			"opencode.local.md",
-			"OpenCode.md",
-			"OpenCode.local.md",
-			"OPENCODE.md",
-			"OPENCODE.local.md",
+			"omnitrix.md",
+			"omnitrix.local.md",
+			"Omnitrix.md",
+			"Omnitrix.local.md",
+			"OMNITRIX.md",
+			"OMNITRIX.local.md",
 		},
 	}
 
@@ -105,17 +105,10 @@ func generateSchema() map[string]any {
 			"theme": map[string]any{
 				"type":        "string",
 				"description": "TUI theme name",
-				"default":     "opencode",
+				"default":     "dracula",
 				"enum": []string{
-					"opencode",
-					"catppuccin",
 					"dracula",
-					"flexoki",
-					"gruvbox",
-					"monokai",
-					"onedark",
-					"tokyonight",
-					"tron",
+					"obsidian",
 				},
 			},
 		},

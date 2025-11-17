@@ -1,19 +1,9 @@
 # Binaries for programs and plugins
-Omnitrix.md
-.omnitrix
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
-
-/example
-/data
-data/
-
-# Documentation and test files
-PR_PATCH_TOOL.md
-*.db
 
 # Test binary, built with `go test -c`
 *.test
@@ -41,7 +31,7 @@ go.work
 .Trashes
 ehthumbs.db
 Thumbs.db
-debug.log
+*.log
 
 # Binary output directory
 /bin/
@@ -51,3 +41,18 @@ debug.log
 .env
 .env.local
 
+.omnitrix/
+
+omnitrix
+omnitrix.md
+
+# Ignore all Markdown files
+*.md
+*.MD
+*.markdown
+*.MARKDOWN
+
+# Ignore README files in any format
+README*
+readme*
+Readme*

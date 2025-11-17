@@ -1,24 +1,14 @@
 package main
 
 import (
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
 	"github.com/omnitrix-sh/cli/cmd"
+	"github.com/omnitrix-sh/cli/internal/logging"
 )
 
 func main() {
-	// Load .env file if it exists
-	_ = godotenv.Load()
-
-	// Create a log file and make that the log output
-	logfile, err := os.OpenFile("debug.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
-	if err != nil {
-		panic(err)
-	}
-
-	log.SetOutput(logfile)
+	defer logging.RecoverPanic("main", func() {
+		logging.ErrorPersist("Application terminated due to unhandled panic")
+	})
 
 	cmd.Execute()
 }
