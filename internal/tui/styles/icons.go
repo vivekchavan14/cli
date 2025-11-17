@@ -25,7 +25,7 @@ const (
 
 	// User Interface Icons
 	UserIcon     string = "►"
-	BotIcon      string = "AI"
+	BotIcon      string = "⧩"
 	SendIcon     string = "→"
 	ThinkingIcon string = "..."
 	DoneIcon     string = "✓"

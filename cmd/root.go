@@ -9,7 +9,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	zone "github.com/lrstanley/bubblezone"
-	"github.com/spf13/cobra"
 	"github.com/omnitrix-sh/cli/internal/app"
 	"github.com/omnitrix-sh/cli/internal/config"
 	"github.com/omnitrix-sh/cli/internal/db"
@@ -19,6 +18,7 @@ import (
 	"github.com/omnitrix-sh/cli/internal/pubsub"
 	"github.com/omnitrix-sh/cli/internal/tui"
 	"github.com/omnitrix-sh/cli/internal/version"
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
